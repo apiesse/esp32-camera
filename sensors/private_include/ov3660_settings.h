@@ -9,7 +9,7 @@
 #define REG_DLY 0xffff
 #define REGLIST_TAIL 0x0000
 
-const DRAM_ATTR uint16_t sensor_default_regs[][2] = {
+static const DRAM_ATTR uint16_t sensor_default_regs[][2] = {
     {SYSTEM_CTROL0, 0x82},  // software reset
     {REG_DLY, 10}, // delay 10ms
 
@@ -131,22 +131,23 @@ const DRAM_ATTR uint16_t sensor_default_regs[][2] = {
     {0x538a, 0x01},
     {0x538b, 0x98},
 
-    {0x5481, 0x05},
-    {0x5482, 0x09},
-    {0x5483, 0x10},
-    {0x5484, 0x3a},
-    {0x5485, 0x4c},
-    {0x5486, 0x5a},
-    {0x5487, 0x68},
-    {0x5488, 0x74},
-    {0x5489, 0x80},
-    {0x548a, 0x8e},
-    {0x548b, 0xa4},
-    {0x548c, 0xb4},
-    {0x548d, 0xc8},
-    {0x548e, 0xde},
-    {0x548f, 0xf0},
-    {0x5490, 0x15},
+    {0x5480, 0x01},
+//    {0x5481, 0x05},
+//    {0x5482, 0x09},
+//    {0x5483, 0x10},
+//    {0x5484, 0x3a},
+//    {0x5485, 0x4c},
+//    {0x5486, 0x5a},
+//    {0x5487, 0x68},
+//    {0x5488, 0x74},
+//    {0x5489, 0x80},
+//    {0x548a, 0x8e},
+//    {0x548b, 0xa4},
+//    {0x548c, 0xb4},
+//    {0x548d, 0xc8},
+//    {0x548e, 0xde},
+//    {0x548f, 0xf0},
+//    {0x5490, 0x15},
 
     {0x5000, 0xa7},
     {0x5800, 0x0C},
@@ -247,7 +248,7 @@ const DRAM_ATTR uint16_t sensor_default_regs[][2] = {
     {REGLIST_TAIL, 0x00}, // tail
 };
 
-const DRAM_ATTR uint16_t sensor_fmt_jpeg[][2] = {
+static const DRAM_ATTR uint16_t sensor_fmt_jpeg[][2] = {
     {FORMAT_CTRL, 0x00}, // YUV422
     {FORMAT_CTRL00, 0x30}, // YUYV
     {0x3002, 0x00},//0x1c to 0x00 !!!
@@ -256,30 +257,30 @@ const DRAM_ATTR uint16_t sensor_fmt_jpeg[][2] = {
     {REGLIST_TAIL, 0x00}, // tail
 };
 
-const DRAM_ATTR uint16_t sensor_fmt_raw[][2] = {
+static const DRAM_ATTR uint16_t sensor_fmt_raw[][2] = {
     {FORMAT_CTRL00, 0x00}, // RAW
     {REGLIST_TAIL, 0x00}
 };
 
-const DRAM_ATTR uint16_t sensor_fmt_grayscale[][2] = {
+static const DRAM_ATTR uint16_t sensor_fmt_grayscale[][2] = {
     {FORMAT_CTRL, 0x00}, // YUV422
     {FORMAT_CTRL00, 0x10}, // Y8
     {REGLIST_TAIL, 0x00}
 };
 
-const DRAM_ATTR uint16_t sensor_fmt_yuv422[][2] = {
+static const DRAM_ATTR uint16_t sensor_fmt_yuv422[][2] = {
     {FORMAT_CTRL, 0x00}, // YUV422
     {FORMAT_CTRL00, 0x30}, // YUYV
     {REGLIST_TAIL, 0x00}
 };
 
-const DRAM_ATTR uint16_t sensor_fmt_rgb565[][2] = {
+static const DRAM_ATTR uint16_t sensor_fmt_rgb565[][2] = {
     {FORMAT_CTRL, 0x01}, // RGB
     {FORMAT_CTRL00, 0x61}, // RGB565 (BGR)
     {REGLIST_TAIL, 0x00}
 };
 
-const DRAM_ATTR uint8_t sensor_saturation_levels[9][11] = {
+static const DRAM_ATTR uint8_t sensor_saturation_levels[9][11] = {
     {0x1d, 0x60, 0x03, 0x07, 0x48, 0x4f, 0x4b, 0x40, 0x0b, 0x01, 0x98},//-4
     {0x1d, 0x60, 0x03, 0x08, 0x54, 0x5c, 0x58, 0x4b, 0x0d, 0x01, 0x98},//-3
     {0x1d, 0x60, 0x03, 0x0a, 0x60, 0x6a, 0x64, 0x56, 0x0e, 0x01, 0x98},//-2
@@ -291,7 +292,7 @@ const DRAM_ATTR uint8_t sensor_saturation_levels[9][11] = {
     {0x1d, 0x60, 0x03, 0x11, 0xa8, 0xb9, 0xaf, 0x96, 0x19, 0x01, 0x98},//+4
 };
 
-const DRAM_ATTR uint8_t sensor_special_effects[7][4] = {
+static const DRAM_ATTR uint8_t sensor_special_effects[7][4] = {
     {0x06, 0x40, 0x2c, 0x08},//Normal
     {0x46, 0x40, 0x28, 0x08},//Negative
     {0x1e, 0x80, 0x80, 0x08},//Grayscale
