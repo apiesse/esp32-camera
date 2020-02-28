@@ -54,6 +54,55 @@ static int read_reg16(uint8_t slv_addr, const uint16_t reg){
     return ret;
 }
 
+static void dump_reg(sensor_t *sensor, const uint16_t reg){
+    int v = SCCB_Read16(sensor->slv_addr, reg);
+    if(v < 0){
+        ets_printf("  0x%04x: FAIL[%d]\n", reg, v);
+    } else {
+        ets_printf("  0x%04x: 0x%02X\n", reg, v);
+    }
+}
+
+static void dump_range(sensor_t *sensor, const char * name, const uint16_t start_reg, const uint16_t end_reg){
+    ets_printf("%s: 0x%04x - 0x%04X\n", name, start_reg, end_reg);
+    for(uint16_t reg = start_reg; reg <= end_reg; reg++){
+        dump_reg(sensor, reg);
+    }
+}
+
+static void dump_regs(sensor_t *sensor){
+//    dump_range(sensor, "All Regs", 0x3000, 0x6100);
+//    dump_range(sensor, "system and IO pad control", 0x3000, 0x3052);
+//    dump_range(sensor, "SCCB control", 0x3100, 0x3108);
+//    dump_range(sensor, "SRB control", 0x3200, 0x3211);
+//    dump_range(sensor, "AWB gain control", 0x3400, 0x3406);
+//    dump_range(sensor, "AEC/AGC control", 0x3500, 0x350D);
+//    dump_range(sensor, "VCM control", 0x3600, 0x3606);
+//    dump_range(sensor, "timing control", 0x3800, 0x3821);
+//    dump_range(sensor, "AEC/AGC power down domain control", 0x3A00, 0x3A25);
+//    dump_range(sensor, "strobe control", 0x3B00, 0x3B0C);
+//    dump_range(sensor, "50/60Hz detector control", 0x3C00, 0x3C1E);
+//    dump_range(sensor, "OTP control", 0x3D00, 0x3D21);
+//    dump_range(sensor, "MC control", 0x3F00, 0x3F0D);
+//    dump_range(sensor, "BLC control", 0x4000, 0x4033);
+//    dump_range(sensor, "frame control", 0x4201, 0x4202);
+//    dump_range(sensor, "format control", 0x4300, 0x430D);
+//    dump_range(sensor, "JPEG control", 0x4400, 0x4431);
+//    dump_range(sensor, "VFIFO control", 0x4600, 0x460D);
+//    dump_range(sensor, "DVP control", 0x4709, 0x4745);
+//    dump_range(sensor, "MIPI control", 0x4800, 0x4837);
+//    dump_range(sensor, "ISP frame control", 0x4901, 0x4902);
+//    dump_range(sensor, "ISP top control", 0x5000, 0x5063);
+//    dump_range(sensor, "AWB control", 0x5180, 0x51D0);
+//    dump_range(sensor, "CIP control", 0x5300, 0x530F);
+//    dump_range(sensor, "CMX control", 0x5380, 0x538B);
+//    dump_range(sensor, "gamma control", 0x5480, 0x5490);
+//    dump_range(sensor, "SDE control", 0x5580, 0x558C);
+//    dump_range(sensor, "scale control", 0x5600, 0x5606);
+//    dump_range(sensor, "AVG control", 0x5680, 0x56A2);
+//    dump_range(sensor, "LENC control", 0x5800, 0x5849);
+//    dump_range(sensor, "AFC control", 0x6000, 0x603F);
+}
 
 static int write_reg(uint8_t slv_addr, const uint16_t reg, uint8_t value){
     int ret = 0;
@@ -185,6 +234,8 @@ static int set_ae_level(sensor_t *sensor, int level);
 
 static int reset(sensor_t *sensor)
 {
+    //dump_regs(sensor);
+    vTaskDelay(100 / portTICK_PERIOD_MS);
     int ret = 0;
     // Software Reset: clear all registers and reset them to their default values
     ret = write_reg(sensor->slv_addr, SYSTEM_CTROL0, 0x82);
@@ -193,7 +244,7 @@ static int reset(sensor_t *sensor)
         return ret;
     }
     vTaskDelay(100 / portTICK_PERIOD_MS);
-    ret = write_regs(sensor->slv_addr, ov5640_init_setting);//sensor_default_regs);
+    ret = write_regs(sensor->slv_addr, sensor_default_regs);
     if (ret == 0) {
         ESP_LOGD(TAG, "Camera defaults loaded");
         vTaskDelay(100 / portTICK_PERIOD_MS);
@@ -240,31 +291,6 @@ static int set_pixformat(sensor_t *sensor, pixformat_t pixformat)
     }
     return ret;
 }
-//
-//typedef struct {
-//        uint16_t max_width;
-//        uint16_t max_height;
-//        uint16_t start_x;
-//        uint16_t start_y;
-//        uint16_t end_x;
-//        uint16_t end_y;
-//        uint16_t offset_x;
-//        uint16_t offset_y;
-//        uint16_t total_x;
-//        uint16_t total_y;
-//} ratio_settings_t;
-
-static const ratio_settings_t ratio_table[] = {
-    //  mw,   mh,  sx,  sy,   ex,   ey, ox, oy,   tx,   ty
-    { 2560, 1920,   0,   0, 2623, 1951, 32, 16, 2844, 1968 }, //4x3
-    { 2560, 1704,   0, 110, 2623, 1843, 32, 16, 2844, 1752 }, //3x2
-    { 2560, 1600,   0, 160, 2623, 1791, 32, 16, 2844, 1648 }, //16x10
-    { 2560, 1536,   0, 192, 2623, 1759, 32, 16, 2844, 1584 }, //5x3
-    { 2560, 1440,   0, 240, 2623, 1711, 32, 16, 2844, 1488 }, //16x9
-    { 2560, 1080,   0, 420, 2623, 1531, 32, 16, 2844, 1128 }, //21x9
-    { 2400, 1920,  80,   0, 2543, 1951, 32, 16, 2684, 1968 }, //5x4
-    { 1920, 1920, 320,   0, 2543, 1951, 32, 16, 2684, 1968 }  //1x1
-};
 
 static int set_image_options(sensor_t *sensor)
 {
@@ -398,7 +424,8 @@ static int set_framesize(sensor_t *sensor, framesize_t framesize)
     }
 
     if (sensor->pixformat == PIXFORMAT_JPEG) {
-        ret = set_pll(sensor, false, 10, 1, 1, false, 0, true, 10);
+        //ret = set_pll(sensor, false, 10, 1, 2, true, 0, true, 10);
+        ret = set_pll(sensor, false, 31, 1, 0, true, 0, true, 10);
     } else {
         if (framesize > FRAMESIZE_CIF) {
             //10MHz SYSCLK and 10MHz PCLK (6.19 FPS)
@@ -913,6 +940,19 @@ static int set_denoise(sensor_t *sensor, int level)
     return ret;
 }
 
+static int get_reg(sensor_t *sensor, int reg, int mask){
+    int ret = 0;
+    if(mask > 0xFF){
+        ret = read_reg16(sensor->slv_addr, reg);
+    } else {
+        ret = read_reg(sensor->slv_addr, reg);
+    }
+    if(ret > 0){
+        ret &= mask;
+    }
+    return ret;
+}
+
 static int sensor_set_reg(sensor_t *sensor, int reg, int mask, int value){
     return set_reg_bits(sensor->slv_addr, reg & 0xffff, 0, mask & 0xff, value & 0xff);
 }
@@ -1013,6 +1053,7 @@ int ov5640_init(sensor_t *sensor)
     sensor->set_lenc = set_lenc_dsp;
     sensor->set_denoise = set_denoise;
 
+    sensor->get_reg = get_reg;
     sensor->set_reg = sensor_set_reg;
     sensor->set_res_raw = set_res_raw;
     sensor->set_pll = _set_pll;

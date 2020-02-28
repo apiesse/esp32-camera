@@ -238,32 +238,6 @@ static int set_pixformat(sensor_t *sensor, pixformat_t pixformat)
     return ret;
 }
 
-//
-//typedef struct {
-//        uint16_t max_width;
-//        uint16_t max_height;
-//        uint16_t start_x;
-//        uint16_t start_y;
-//        uint16_t end_x;
-//        uint16_t end_y;
-//        uint16_t offset_x;
-//        uint16_t offset_y;
-//        uint16_t total_x;
-//        uint16_t total_y;
-//} ratio_settings_t;
-
-static const ratio_settings_t ratio_table[] = {
-    //  mw,   mh,  sx,  sy,   ex,   ey, ox, oy,   tx,   ty
-    { 2048, 1536,   0,   0, 2079, 1547, 16, 6, 2300, 1564 }, //4x3
-    { 1920, 1280,  64, 128, 2015, 1419, 16, 6, 2172, 1436 }, //3x2
-    { 2048, 1280,   0, 128, 2079, 1419, 16, 6, 2300, 1436 }, //16x10
-    { 1920, 1152,  64, 192, 2015, 1355, 16, 6, 2172, 1372 }, //5x3
-    { 1920, 1080,  64, 242, 2015, 1333, 16, 6, 2172, 1322 }, //16x9
-    { 2048,  880,   0, 328, 2079, 1219, 16, 6, 2300, 1236 }, //21x9
-    { 1920, 1536,  64,   0, 2015, 1547, 16, 6, 2172, 1564 }, //5x4
-    { 1536, 1536, 256,   0, 1823, 1547, 16, 6, 2044, 1564 }  //1x1
-};
-
 static int set_image_options(sensor_t *sensor)
 {
     int ret = 0;
@@ -909,6 +883,19 @@ static int set_denoise(sensor_t *sensor, int level)
     return ret;
 }
 
+static int get_reg(sensor_t *sensor, int reg, int mask){
+    int ret = 0;
+    if(mask > 0xFF){
+        ret = read_reg16(sensor->slv_addr, reg);
+    } else {
+        ret = read_reg(sensor->slv_addr, reg);
+    }
+    if(ret > 0){
+        ret &= mask;
+    }
+    return ret;
+}
+
 static int sensor_set_reg(sensor_t *sensor, int reg, int mask, int value){
     return set_reg_bits(sensor->slv_addr, reg & 0xffff, 0, mask & 0xff, value & 0xff);
 }
@@ -1017,6 +1004,7 @@ int ov3660_init(sensor_t *sensor)
     sensor->set_lenc = set_lenc_dsp;
     sensor->set_denoise = set_denoise;
 
+    sensor->get_reg = get_reg;
     sensor->set_reg = sensor_set_reg;
     sensor->set_res_raw = set_res_raw;
     sensor->set_pll = _set_pll;

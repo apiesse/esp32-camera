@@ -173,6 +173,7 @@ typedef struct _sensor {
     int  (*set_raw_gma)         (sensor_t *sensor, int enable);
     int  (*set_lenc)            (sensor_t *sensor, int enable);
 
+    int  (*get_reg)             (sensor_t *sensor, int reg, int mask);
     int  (*set_reg)             (sensor_t *sensor, int reg, int mask, int value);
     int  (*set_res_raw)         (sensor_t *sensor, int reg4520, int incrementX, int incrementY, int startX, int startY, int endX, int endY, int offsetX, int offsetY, int totalX, int totalY, int outputX, int outputY, bool scale, int reg20, int reg21, int reg4514);
     int  (*set_pll)             (sensor_t *sensor, int bypass, int mul, int sys, int root, int pre, int seld5, int pclken, int pclk);
