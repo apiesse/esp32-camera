@@ -1059,12 +1059,6 @@ esp_err_t camera_probe(const camera_config_t* config, camera_model_t* out_camera
     case OV5640_PID:
         *out_camera_model = CAMERA_OV5640;
         ov5640_init(&s_state->sensor);
-
-        //force 14 MHz XCLK for now
-        if(config->xclk_freq_hz > 14000000UL){
-            ESP_LOGW(TAG, "OV5640 supports up to 14MHz XCLK. Switching...");
-            s_state->sensor.set_xclk(&s_state->sensor, config->ledc_timer, 14);
-        }
         break;
 #endif
     default:

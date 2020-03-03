@@ -173,56 +173,66 @@ static int write_addr_reg(uint8_t slv_addr, const uint16_t reg, uint16_t x_value
 
 #define write_reg_bits(slv_addr, reg, mask, enable) set_reg_bits(slv_addr, reg, 0, mask, (enable)?(mask):0)
 
-static int calc_sysclk(int xclk, bool pll_bypass, int pll_multiplier, int pll_sys_div, int pll_pre_div, bool pll_root_2x, int pll_seld5, bool pclk_manual, int pclk_div)
+static int calc_sysclk(int xclk, bool pll_bypass, int pll_multiplier, int pll_sys_div, int pll_pre_div, bool pll_root_2x, int pclk_root_div, bool pclk_manual, int pclk_div)
 {
-    const int pll_pre_div2x_map[] = { 2, 3, 4, 6 };//values are multiplied by two to avoid floats
-    const int pll_seld52x_map[] = { 2, 2, 4, 5 };
+    const float pll_pre_div2x_map[] = { 1, 1, 2, 3, 4, 1.5, 6, 2.5, 8};
+    const int pll_pclk_root_div_map[] = { 1, 2, 4, 8 };
 
     if(!pll_sys_div) {
         pll_sys_div = 1;
     }
 
-    unsigned int pll_pre_div2x = pll_pre_div2x_map[pll_pre_div];
+    float pll_pre_div2x = pll_pre_div2x_map[pll_pre_div];
     unsigned int pll_root_div = pll_root_2x?2:1;
-    unsigned int pll_seld52x = pll_seld52x_map[pll_seld5];
+    unsigned int pll_seld52x = pll_pclk_root_div_map[pclk_root_div];
 
-    unsigned int REFIN = (xclk * 2) / pll_pre_div2x;
+    unsigned int REFIN = xclk / pll_pre_div2x;
 
-    unsigned int VCO = REFIN * pll_multiplier * pll_root_div;
+    unsigned int VCO = (REFIN * pll_multiplier) / pll_root_div / 2.5;//where does this come from?
 
-    unsigned int PLL_CLK = pll_bypass?(xclk):(VCO * 2 / pll_sys_div / pll_seld52x);
+    unsigned int PLL_CLK = pll_bypass?(xclk):(VCO / pll_sys_div);
 
-    unsigned int PCLK = PLL_CLK / 2 / ((pclk_manual && pclk_div)?pclk_div:1);
+    unsigned int PCLK = PLL_CLK / pll_seld52x / ((pclk_manual && pclk_div)?pclk_div:2);
+
     unsigned int SYSCLK = PLL_CLK / 4;
 
     ESP_LOGD(TAG, "Calculated XVCLK: %d Hz, REFIN: %u Hz, VCO: %u Hz, PLL_CLK: %u Hz, SYSCLK: %u Hz, PCLK: %u Hz", xclk, REFIN, VCO, PLL_CLK, SYSCLK, PCLK);
     return SYSCLK;
 }
 
-static int set_pll(sensor_t *sensor, bool bypass, uint8_t multiplier, uint8_t sys_div, uint8_t pre_div, bool root_2x, uint8_t seld5, bool pclk_manual, uint8_t pclk_div){
+static int set_pll(sensor_t *sensor, bool bypass, uint8_t multiplier, uint8_t sys_div, uint8_t pre_div, bool root_2x, uint8_t pclk_root_div, bool pclk_manual, uint8_t pclk_div){
     int ret = 0;
-    if(multiplier > 31 || sys_div > 15 || pre_div > 3 || pclk_div > 31 || seld5 > 3){
+    if(multiplier > 252 || multiplier < 4 || sys_div > 15 || pre_div > 8 || pclk_div > 31 || pclk_root_div > 3){
         ESP_LOGE(TAG, "Invalid arguments");
         return -1;
     }
+    if(multiplier > 127){
+        multiplier &= 0xFE;//only even integers above 127
+    }
 
-    calc_sysclk(sensor->xclk_freq_hz, bypass, multiplier, sys_div, pre_div, root_2x, seld5, pclk_manual, pclk_div);
+    calc_sysclk(sensor->xclk_freq_hz, bypass, multiplier, sys_div, pre_div, root_2x, pclk_root_div, pclk_manual, pclk_div);
 
-    ret = write_reg(sensor->slv_addr, SC_PLLS_CTRL0, bypass?0x80:0x00);
+    ret = write_reg(sensor->slv_addr, 0x3039, bypass?0x80:0x00);
     if (ret == 0) {
-        ret = write_reg(sensor->slv_addr, SC_PLLS_CTRL1, multiplier & 0x1f);
+        ret = write_reg(sensor->slv_addr, 0x3035, 0x01 | ((sys_div & 0x0f) << 4));
     }
     if (ret == 0) {
-        ret = write_reg(sensor->slv_addr, SC_PLLS_CTRL2, 0x10 | (sys_div & 0x0f));
+        ret = write_reg(sensor->slv_addr, 0x3036, multiplier & 0xff);
     }
     if (ret == 0) {
-        ret = write_reg(sensor->slv_addr, SC_PLLS_CTRL3, (pre_div & 0x3) << 4 | seld5 | (root_2x?0x40:0x00));
+        ret = write_reg(sensor->slv_addr, 0x3037, (pre_div & 0xf) | (root_2x?0x10:0x00));
     }
     if (ret == 0) {
-        ret = write_reg(sensor->slv_addr, PCLK_RATIO, pclk_div & 0x1f);
+        ret = write_reg(sensor->slv_addr, 0x3108, (pclk_root_div & 0x3) << 4 | 0x06);
     }
     if (ret == 0) {
-        ret = write_reg(sensor->slv_addr, VFIFO_CTRL0C, pclk_manual?0x22:0x20);
+        ret = write_reg(sensor->slv_addr, 0x3824, pclk_div & 0x1f);
+    }
+    if (ret == 0) {
+        ret = write_reg(sensor->slv_addr, 0x460C, pclk_manual?0x22:0x20);
+    }
+    if (ret == 0) {
+        ret = write_reg(sensor->slv_addr, 0x3103, 0x13);// system clock from pll, bit[1]
     }
     if(ret){
         ESP_LOGE(TAG, "set_sensor_pll FAILED!");
@@ -424,8 +434,14 @@ static int set_framesize(sensor_t *sensor, framesize_t framesize)
     }
 
     if (sensor->pixformat == PIXFORMAT_JPEG) {
-        //ret = set_pll(sensor, false, 10, 1, 2, true, 0, true, 10);
-        ret = set_pll(sensor, false, 31, 1, 0, true, 0, true, 10);
+        //10MHz PCLK
+        uint8_t sys_mul = 200;
+        if(framesize < FRAMESIZE_QVGA){
+            sys_mul = 160;
+        } else if(framesize < FRAMESIZE_XGA){
+            sys_mul = 180;
+        }
+        ret = set_pll(sensor, false, sys_mul, 4, 2, false, 2, true, 4);
     } else {
         if (framesize > FRAMESIZE_CIF) {
             //10MHz SYSCLK and 10MHz PCLK (6.19 FPS)
