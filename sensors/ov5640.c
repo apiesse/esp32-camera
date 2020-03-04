@@ -54,55 +54,55 @@ static int read_reg16(uint8_t slv_addr, const uint16_t reg){
     return ret;
 }
 
-static void dump_reg(sensor_t *sensor, const uint16_t reg){
-    int v = SCCB_Read16(sensor->slv_addr, reg);
-    if(v < 0){
-        ets_printf("  0x%04x: FAIL[%d]\n", reg, v);
-    } else {
-        ets_printf("  0x%04x: 0x%02X\n", reg, v);
-    }
-}
-
-static void dump_range(sensor_t *sensor, const char * name, const uint16_t start_reg, const uint16_t end_reg){
-    ets_printf("%s: 0x%04x - 0x%04X\n", name, start_reg, end_reg);
-    for(uint16_t reg = start_reg; reg <= end_reg; reg++){
-        dump_reg(sensor, reg);
-    }
-}
-
-static void dump_regs(sensor_t *sensor){
-//    dump_range(sensor, "All Regs", 0x3000, 0x6100);
-//    dump_range(sensor, "system and IO pad control", 0x3000, 0x3052);
-//    dump_range(sensor, "SCCB control", 0x3100, 0x3108);
-//    dump_range(sensor, "SRB control", 0x3200, 0x3211);
-//    dump_range(sensor, "AWB gain control", 0x3400, 0x3406);
-//    dump_range(sensor, "AEC/AGC control", 0x3500, 0x350D);
-//    dump_range(sensor, "VCM control", 0x3600, 0x3606);
-//    dump_range(sensor, "timing control", 0x3800, 0x3821);
-//    dump_range(sensor, "AEC/AGC power down domain control", 0x3A00, 0x3A25);
-//    dump_range(sensor, "strobe control", 0x3B00, 0x3B0C);
-//    dump_range(sensor, "50/60Hz detector control", 0x3C00, 0x3C1E);
-//    dump_range(sensor, "OTP control", 0x3D00, 0x3D21);
-//    dump_range(sensor, "MC control", 0x3F00, 0x3F0D);
-//    dump_range(sensor, "BLC control", 0x4000, 0x4033);
-//    dump_range(sensor, "frame control", 0x4201, 0x4202);
-//    dump_range(sensor, "format control", 0x4300, 0x430D);
-//    dump_range(sensor, "JPEG control", 0x4400, 0x4431);
-//    dump_range(sensor, "VFIFO control", 0x4600, 0x460D);
-//    dump_range(sensor, "DVP control", 0x4709, 0x4745);
-//    dump_range(sensor, "MIPI control", 0x4800, 0x4837);
-//    dump_range(sensor, "ISP frame control", 0x4901, 0x4902);
-//    dump_range(sensor, "ISP top control", 0x5000, 0x5063);
-//    dump_range(sensor, "AWB control", 0x5180, 0x51D0);
-//    dump_range(sensor, "CIP control", 0x5300, 0x530F);
-//    dump_range(sensor, "CMX control", 0x5380, 0x538B);
-//    dump_range(sensor, "gamma control", 0x5480, 0x5490);
-//    dump_range(sensor, "SDE control", 0x5580, 0x558C);
-//    dump_range(sensor, "scale control", 0x5600, 0x5606);
-//    dump_range(sensor, "AVG control", 0x5680, 0x56A2);
-//    dump_range(sensor, "LENC control", 0x5800, 0x5849);
-//    dump_range(sensor, "AFC control", 0x6000, 0x603F);
-}
+//static void dump_reg(sensor_t *sensor, const uint16_t reg){
+//    int v = SCCB_Read16(sensor->slv_addr, reg);
+//    if(v < 0){
+//        ets_printf("  0x%04x: FAIL[%d]\n", reg, v);
+//    } else {
+//        ets_printf("  0x%04x: 0x%02X\n", reg, v);
+//    }
+//}
+//
+//static void dump_range(sensor_t *sensor, const char * name, const uint16_t start_reg, const uint16_t end_reg){
+//    ets_printf("%s: 0x%04x - 0x%04X\n", name, start_reg, end_reg);
+//    for(uint16_t reg = start_reg; reg <= end_reg; reg++){
+//        dump_reg(sensor, reg);
+//    }
+//}
+//
+//static void dump_regs(sensor_t *sensor){
+////    dump_range(sensor, "All Regs", 0x3000, 0x6100);
+////    dump_range(sensor, "system and IO pad control", 0x3000, 0x3052);
+////    dump_range(sensor, "SCCB control", 0x3100, 0x3108);
+////    dump_range(sensor, "SRB control", 0x3200, 0x3211);
+////    dump_range(sensor, "AWB gain control", 0x3400, 0x3406);
+////    dump_range(sensor, "AEC/AGC control", 0x3500, 0x350D);
+////    dump_range(sensor, "VCM control", 0x3600, 0x3606);
+////    dump_range(sensor, "timing control", 0x3800, 0x3821);
+////    dump_range(sensor, "AEC/AGC power down domain control", 0x3A00, 0x3A25);
+////    dump_range(sensor, "strobe control", 0x3B00, 0x3B0C);
+////    dump_range(sensor, "50/60Hz detector control", 0x3C00, 0x3C1E);
+////    dump_range(sensor, "OTP control", 0x3D00, 0x3D21);
+////    dump_range(sensor, "MC control", 0x3F00, 0x3F0D);
+////    dump_range(sensor, "BLC control", 0x4000, 0x4033);
+////    dump_range(sensor, "frame control", 0x4201, 0x4202);
+////    dump_range(sensor, "format control", 0x4300, 0x430D);
+////    dump_range(sensor, "JPEG control", 0x4400, 0x4431);
+////    dump_range(sensor, "VFIFO control", 0x4600, 0x460D);
+////    dump_range(sensor, "DVP control", 0x4709, 0x4745);
+////    dump_range(sensor, "MIPI control", 0x4800, 0x4837);
+////    dump_range(sensor, "ISP frame control", 0x4901, 0x4902);
+////    dump_range(sensor, "ISP top control", 0x5000, 0x5063);
+////    dump_range(sensor, "AWB control", 0x5180, 0x51D0);
+////    dump_range(sensor, "CIP control", 0x5300, 0x530F);
+////    dump_range(sensor, "CMX control", 0x5380, 0x538B);
+////    dump_range(sensor, "gamma control", 0x5480, 0x5490);
+////    dump_range(sensor, "SDE control", 0x5580, 0x558C);
+////    dump_range(sensor, "scale control", 0x5600, 0x5606);
+////    dump_range(sensor, "AVG control", 0x5680, 0x56A2);
+////    dump_range(sensor, "LENC control", 0x5800, 0x5849);
+////    dump_range(sensor, "AFC control", 0x6000, 0x603F);
+//}
 
 static int write_reg(uint8_t slv_addr, const uint16_t reg, uint8_t value){
     int ret = 0;
@@ -260,7 +260,7 @@ static int reset(sensor_t *sensor)
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
     write_regs(sensor->slv_addr, sensor_regs_awb0);
-    //write_regs(sensor->slv_addr, sensor_regs_gamma0);
+    write_regs(sensor->slv_addr, sensor_regs_gamma1);
     return ret;
 }
 
@@ -958,7 +958,8 @@ static int set_denoise(sensor_t *sensor, int level)
     return ret;
 }
 
-static int get_reg(sensor_t *sensor, int reg, int mask){
+static int get_reg(sensor_t *sensor, int reg, int mask)
+{
     int ret = 0;
     if(mask > 0xFF){
         ret = read_reg16(sensor->slv_addr, reg);
@@ -971,8 +972,19 @@ static int get_reg(sensor_t *sensor, int reg, int mask){
     return ret;
 }
 
-static int sensor_set_reg(sensor_t *sensor, int reg, int mask, int value){
-    return set_reg_bits(sensor->slv_addr, reg & 0xffff, 0, mask & 0xff, value & 0xff);
+static int set_reg(sensor_t *sensor, int reg, int mask, int value)
+{
+    int ret = get_reg(sensor, reg, mask);
+    if(ret < 0){
+        return ret;
+    }
+    value = (ret & ~mask) | (value & mask);
+    if(mask > 0xFF){
+        ret = write_reg16(sensor->slv_addr, reg, value);
+    } else {
+        ret = write_reg(sensor->slv_addr, reg, value);
+    }
+    return ret;
 }
 
 static int set_res_raw(sensor_t *sensor, int reg4520, int incrementX, int incrementY, int startX, int startY, int endX, int endY, int offsetX, int offsetY, int totalX, int totalY, int outputX, int outputY, bool scale, int reg20, int reg21, int reg4514)
@@ -1072,7 +1084,7 @@ int ov5640_init(sensor_t *sensor)
     sensor->set_denoise = set_denoise;
 
     sensor->get_reg = get_reg;
-    sensor->set_reg = sensor_set_reg;
+    sensor->set_reg = set_reg;
     sensor->set_res_raw = set_res_raw;
     sensor->set_pll = _set_pll;
     sensor->set_xclk = set_xclk;
