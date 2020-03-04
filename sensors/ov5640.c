@@ -259,6 +259,8 @@ static int reset(sensor_t *sensor)
         ESP_LOGD(TAG, "Camera defaults loaded");
         vTaskDelay(100 / portTICK_PERIOD_MS);
     }
+    write_regs(sensor->slv_addr, sensor_regs_awb0);
+    //write_regs(sensor->slv_addr, sensor_regs_gamma0);
     return ret;
 }
 
